@@ -13,7 +13,7 @@ const app = new Koa();
 const router = new Router();
 const home = Public(path.resolve(__dirname, "./client/dist/"))
 
-const { getDate, getGoodsType } = require('./api');
+const { getDate, getGoodsType, getFakeChartData } = require('./api');
 
 // 获取日期列表
 router.get('/api/getDateList', async ctx => {
@@ -55,7 +55,7 @@ router.get('/api/delete', async ctx => {
   date && (query.date = date);
   goodsType && (query.typeId = goodsType);
   const data = await Good.destroy({
-    where:query
+    where: query
   })
   ctx.body = {
     data
@@ -144,6 +144,10 @@ router.get('/api/currentUser', async ctx => {
     address: '西湖区工专路 77 号',
     phone: '0752-268888888',
   }
+});
+
+router.get('/api/fake_chart_data', async ctx => {
+  ctx.body = getFakeChartData;
 })
 
 // 批量导入

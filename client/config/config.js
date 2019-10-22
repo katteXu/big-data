@@ -116,17 +116,11 @@ export default {
               component: './home',
             },
             {
-              path: '/analysis',
-              name: 'myAnalysis',
+              name: 'analysis2',
               icon: 'bar-chart',
-              component: './analysis',
+              path: '/analysis2',
+              component: './analysis2',
             },
-            // {
-            //   path: '/welcome',
-            //   name: 'welcome',
-            //   icon: 'smile',
-            //   component: './Welcome',
-            // },
             {
               component: './404',
             },
@@ -186,8 +180,7 @@ export default {
   proxy: {
     '/api/': {
       target: 'http://localhost:3000',
-      changeOrigin: true,
-      // pathRewrite: { '^/server': '' },
+      changeOrigin: true, // pathRewrite: { '^/server': '' },
     },
   },
 };
