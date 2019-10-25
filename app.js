@@ -6,9 +6,9 @@ const history = require('koa-connect-history-api-fallback');
 const bodyParser = require('koa-bodyparser');
 const xlsx = require('xlsx');
 const path = require('path');
+const _ = require('lodash');
 const config = require('./config');
 const { Good, GoodType } = require('./models');
-
 const app = new Koa();
 const router = new Router();
 const home = Public(path.resolve(__dirname, "./client/dist/"))
@@ -92,16 +92,16 @@ router.post('/api/login', async ctx => {
   }
 });
 
-
+// 获取当前用户
 router.get('/api/currentUser', async ctx => {
   ctx.body = {
-    name: 'Serati Ma',
+    name: '管理员',
     avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
     userid: '00000001',
-    email: 'antdesign@alipay.com',
-    signature: '海纳百川，有容乃大',
-    title: '交互专家',
-    group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+    email: '417560450@qq.com',
+    signature: '',
+    title: '数据专家',
+    group: '所属团队',
     tags: [
       {
         key: '0',
@@ -146,8 +146,52 @@ router.get('/api/currentUser', async ctx => {
   }
 });
 
+// 获取统计数据
 router.get('/api/fake_chart_data', async ctx => {
-  ctx.body = getFakeChartData;
+  const res = await Good.findAll();
+  const type = await GoodType.findAll();
+  // console.log(res);
+  const result = _.chain(res)
+    .groupBy("typeId")
+    .map(function (value, key) {
+      // const resByType = await Good.findAll({ where: { typeId: key } });
+      // const date = _.chain(resByType).groupBy("date").map(function (value, key) {
+      //   return {
+      //     one: _reduce(value, function (result, current) {
+      //       return result + current.salesVolume;
+      //     }, 0)
+      //   }
+      // })
+      return {
+        id: key,
+        salesVolume: _.reduce(value, function (result, current) {
+          return result + current.salesVolume
+        }, 0)
+      };
+    }).value();
+  // 单类商品 日销量
+  const totalByDate = await Promise.all(type.map(async ({ id, name }) => {
+    const res = await Good.findAll({ where: { typeId: id } });
+    const result = _.chain(res).groupBy("date").map((value, key) => {
+      return {
+        x: key, y: _.reduce(value, function (result, current) {
+          return result + current.salesVolume
+        }, 0)
+      }
+    })
+    const total = _.reduce(res, function (result, current) {
+      return result + current.salesVolume
+    }, 0)
+    return { name, data: result, total };
+  }));
+
+  // 总销量
+  const total = type.map(({ id, name }) => {
+    const sales = result.find(o => o.id == id);
+    const total = sales ? sales.salesVolume : 0;
+    return { x: name, y: total };
+  });
+  ctx.body = { ...getFakeChartData, salesData: total, visitData: totalByDate };
 })
 
 // 批量导入

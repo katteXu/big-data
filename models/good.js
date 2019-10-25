@@ -20,6 +20,10 @@ module.exports = function (sequelize, DataTypes) {
     },
     salesVolume: {
       type: DataTypes.STRING(255),
+      get() {
+        const value = this.getDataValue('salesVolume');
+        return eval(value.replace('万', '*10000'));
+      }
     },
     imgUrl: {
       type: DataTypes.STRING(1024),

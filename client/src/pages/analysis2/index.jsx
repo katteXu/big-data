@@ -131,12 +131,12 @@ class Analysis2 extends Component {
       </span>
     );
     const activeKey = currentTabKey || (offlineData[0] && offlineData[0].name);
+
+    console.log(visitData);
     return (
       <GridContent>
         <React.Fragment>
-          <Suspense fallback={<PageLoading />}>
-            <IntroduceRow loading={loading} visitData={visitData} />
-          </Suspense>
+          {/* 商品总销量 */}
           <Suspense fallback={null}>
             <SalesCard
               rangePickerValue={rangePickerValue}
@@ -148,11 +148,20 @@ class Analysis2 extends Component {
             />
           </Suspense>
           <Row
-            gutter={24}
-            type="flex"
             style={{
               marginTop: 24,
             }}
+          >
+            <Col>
+              {/* 单类商品列表 */}
+              <Suspense fallback={<PageLoading />}>
+                <IntroduceRow loading={loading} visitData={visitData} />
+              </Suspense>
+            </Col>
+          </Row>
+          <Row
+            gutter={24}
+            type="flex"
           >
             <Col xl={12} lg={24} md={24} sm={24} xs={24}>
               <Suspense fallback={null}>
