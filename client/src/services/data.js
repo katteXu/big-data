@@ -15,3 +15,6 @@ export async function importData(date, goodsType) {
 export async function deleteData({ params } = {}) {
   return request('/api/delete', { params });
 }
+export async function cleanData() {
+  return request('/api/clean');
+}

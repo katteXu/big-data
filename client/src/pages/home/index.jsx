@@ -1,13 +1,14 @@
 
 import React, { Component } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { Row, Col, Select, Button, Table, message, Alert, Drawer, Modal } from 'antd';
+import { Row, Col, Select, Button, Table, message, Alert, Drawer, Modal, Checkbox } from 'antd';
 import {
   getDateList,
   getGoodsTypeList,
   importData,
   getDataList,
   deleteData,
+  cleanData,
 } from '@/services/data';
 
 class Home extends Component {
@@ -78,6 +79,7 @@ class Home extends Component {
     dloading: false,
     imgUrl: '',
     showImg: false,
+    isClean: true,
   };
 
   componentDidMount() {
@@ -143,6 +145,14 @@ class Home extends Component {
     }
   }
 
+  // 清洗数据
+  clean = async () => {
+    const res = await cleanData();
+    if (res) {
+      message.success('清洗完毕');
+    }
+  }
+
   // 删除
   delete = async () => {
     const { date, goodsType } = this.state;
@@ -194,6 +204,7 @@ class Home extends Component {
       iloading,
       dloading,
       imgUrl,
+      isClean,
       showImg } = this.state;
     return (
       <PageHeaderWrapper title="数据库操作" content="可将excel导入数据库 ，根据查询数据库信息，根据条件清空数据库信息">
@@ -293,7 +304,15 @@ class Home extends Component {
           </Row>
           <Row style={{ marginTop: 12 }}>
             <Col>
+              <Checkbox checked={isClean} onChange={e => this.setState({ isClean: e.target.checked })}>清洗数据</Checkbox>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: 12 }} gutter={12}>
+            <Col span={12}>
               <Button block type="primary" onClick={this.import} loading={iloading}>确认导入</Button>
+            </Col>
+            <Col span={12}>
+              <Button block onClick={this.clean} loading={iloading}>数据清洗</Button>
             </Col>
           </Row>
         </Drawer>
