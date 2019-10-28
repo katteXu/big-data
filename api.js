@@ -4,13 +4,18 @@ const moment = require('moment');
 // 获取日期json
 function getDate() {
   const file = path.resolve(__dirname, "./data");
-  const dir = fs.readdirSync(file);
-  const dateList = dir.filter(fs => fs !== '.DS_Store')
-    .map(item => {
-      const text = moment(item).format('YYYY-MM-DD')
-      return ({ text, key: item })
-    })
-  return dateList;
+  const hasFile = fs.existsSync(file);
+  if (hasFile) {
+    const dir = fs.readdirSync(file);
+    const dateList = dir.filter(fs => fs !== '.DS_Store')
+      .map(item => {
+        const text = moment(item).format('YYYY-MM-DD')
+        return ({ text, key: item })
+      })
+    return dateList;
+  } else {
+    return []
+  }
 }
 
 // 获取商品类别
