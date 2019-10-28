@@ -8,7 +8,7 @@ const xlsx = require('xlsx');
 const path = require('path');
 const _ = require('lodash');
 const config = require('./config');
-const { Good, GoodType } = require('./models');
+const { Good, GoodType,cleanData } = require('./models');
 const app = new Koa();
 const router = new Router();
 const home = Public(path.resolve(__dirname, "./client/dist/"))
@@ -192,6 +192,13 @@ router.get('/api/fake_chart_data', async ctx => {
     return { x: name, y: total };
   });
   ctx.body = { ...getFakeChartData, salesData: total, visitData: totalByDate };
+})
+
+// 清洗数据
+router.get('/api/clean', async ctx => {
+  const res = await cleanData();
+  console.log(res);
+  ctx.body = res;
 })
 
 // 批量导入

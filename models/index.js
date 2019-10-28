@@ -19,8 +19,24 @@ const Good = sequelize.import('./good');
 // 商品类型表
 const GoodType = sequelize.import('./goodType');
 
+// 整体统计表
+const Statistics = sequelize.import('./statistics');
 
-// GoodType.hasMany(Good, { foreignKey: 'id', targetKey: 'type_id', as: 'GoodType' });
+const cleanData = () => sequelize.query(`
+select 
+a.type_id id,
+b.name,
+sum(a.discount_price) total_price,
+avg(a.discount_price) average_price,
+sum(
+case 
+when a.sales_volume like '%万%' then a.sales_volume*10000
+else a.sales_volume*1 end
+) total_sales
+from good a
+left join goodType b on a.type_id = b.id
+group by type_id
+`)
 
 // 同步数据库
 sequelize.sync().then(async () => {
@@ -46,5 +62,7 @@ sequelize.sync().then(async () => {
 
 module.exports = {
   Good,
-  GoodType
+  GoodType,
+  Statistics,
+  cleanData
 }

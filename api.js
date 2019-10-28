@@ -22,6 +22,7 @@ function getGoodsType(date) {
   return goodsTypeList;
 }
 
+
 // mock data
 const visitData = [];
 const beginDay = new Date().getTime();
