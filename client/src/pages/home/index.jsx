@@ -8,6 +8,7 @@ import {
   getDataList,
   deleteData,
   cleanData,
+  uploadData,
 } from '@/services/data';
 
 class Home extends Component {
@@ -204,6 +205,31 @@ class Home extends Component {
     });
   };
 
+  upload = async () => {
+    const { files } = document.getElementById('file');
+    if (files[0]) {
+      const fd = new FormData();
+      const { name } = files[0];
+      if (!/\.(zip)$/.test(name)) {
+        message.error('上传文件应为压缩的zip文件');
+      }
+      fd.append('file', files[0]);
+      this.setState({
+        uloading: true,
+      });
+      const res = await uploadData(fd);
+      if (res.status === 0) {
+        message.success('上传成功');
+        this.getDate();
+      } else {
+        message.error('上传失败');
+      }
+      this.setState({
+        uloading: false,
+      });
+    }
+  };
+
   render() {
     const {
       dateList,
@@ -217,6 +243,7 @@ class Home extends Component {
       imgUrl,
       isClean,
       showImg,
+      uloading,
     } = this.state;
     return (
       <PageHeaderWrapper
@@ -350,13 +377,31 @@ class Home extends Component {
             </Col>
           </Row>
           <Row style={{ marginTop: 12 }}>
-            <Col>
+            <Col span={12}>
               <Checkbox
                 checked={isClean}
                 onChange={e => this.setState({ isClean: e.target.checked })}
               >
                 清洗数据
               </Checkbox>
+            </Col>
+            <Col span={12}>
+              <Button
+                loading={uloading}
+                type="link"
+                size="small"
+                style={{ float: 'right' }}
+                onClick={() => document.getElementById('file').click()}
+              >
+                上传数据
+              </Button>
+              <input
+                type="file"
+                name=""
+                id="file"
+                style={{ display: 'none' }}
+                onChange={this.upload}
+              />
             </Col>
           </Row>
           <Row style={{ marginTop: 12 }} gutter={12}>

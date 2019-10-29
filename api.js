@@ -7,7 +7,7 @@ function getDate() {
   const hasFile = fs.existsSync(file);
   if (hasFile) {
     const dir = fs.readdirSync(file);
-    const dateList = dir.filter(fs => fs !== '.DS_Store')
+    const dateList = dir.filter(fs => (fs !== '.DS_Store' && fs !== '__MACOSX'))
       .map(item => {
         const text = moment(item).format('YYYY-MM-DD')
         return ({ text, key: item })

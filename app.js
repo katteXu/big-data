@@ -2,16 +2,33 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const Public = require('koa-static');
 const cors = require('koa2-cors');
+const multer = require('koa-multer'); //加载koa-multer模块 
 const history = require('koa-connect-history-api-fallback');
 const bodyParser = require('koa-bodyparser');
 const xlsx = require('xlsx');
 const path = require('path');
 const _ = require('lodash');
+const fs = require('fs');
+const compressing = require('compressing');
 const config = require('./config');
 const { Good, GoodType, Statistics, cleanData } = require('./models');
 const app = new Koa();
 const router = new Router();
 const home = Public(path.resolve(__dirname, "./client/dist/"))
+
+const storage = multer.diskStorage({
+  //文件保存路径  
+  destination: function (req, file, cb) {
+    cb(null, './temp/');
+  },
+  //修改文件名称  
+  filename: function (req, file, cb) {
+    const fileFormat = (file.originalname).split(".");
+    cb(null, Date.now() + "." + fileFormat[fileFormat.length - 1]);
+  },
+});
+// 加载配置
+const upload = multer({ storage });
 
 const { getDate, getGoodsType, getFakeChartData } = require('./api');
 
@@ -198,7 +215,20 @@ router.get('/api/fake_chart_data', async ctx => {
 router.get('/api/clean', async ctx => {
   const res = await cleanData();
   ctx.body = res;
-})
+});
+
+// 上传压缩包
+router.post('/api/upload', upload.single('file'), async ctx => {
+  try {
+    delDir('./data/');
+    const res = await exportZip(ctx.req.file.filename);
+    delDir('./temp/');
+    ctx.body = { status: 0, msg: '上传成功' }
+  } catch (error) {
+    ctx.body = { status: 1, msg: '上传失败', error }
+  }
+});
+
 
 // 批量导入
 const importDataBase = async (date, goodsType) => {
@@ -220,6 +250,28 @@ function getFile(date, typeName) {
   const worksheet = data.Sheets.Sheet1;
   const json = xlsx.utils.sheet_to_json(worksheet, { header: ["imgUrl", "title", "discountPrice", "originalPrice", "address", "salesVolume", "link"] });
   return json;
+}
+
+// 解压文件
+function exportZip(filename) {
+  const filepath = path.resolve(__dirname, `./temp/${filename}`);
+  return compressing.zip.uncompress(filepath, './data');
+}
+
+//  清空文件夹
+function delDir(path) {
+  let files = [];
+  if (fs.existsSync(path)) {
+    files = fs.readdirSync(path);
+    files.forEach((file, index) => {
+      let curPath = path + "/" + file;
+      if (fs.statSync(curPath).isDirectory()) {
+        delDir(curPath); //递归删除文件夹
+      } else {
+        fs.unlinkSync(curPath); //删除文件
+      }
+    });
+  }
 }
 
 app.use(bodyParser());

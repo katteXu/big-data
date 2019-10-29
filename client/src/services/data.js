@@ -18,3 +18,9 @@ export async function deleteData({ params } = {}) {
 export async function cleanData() {
   return request('/api/clean');
 }
+export async function uploadData(formData) {
+  return request('/api/upload', {
+    method: 'post',
+    data: formData,
+  });
+}
