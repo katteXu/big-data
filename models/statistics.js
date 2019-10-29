@@ -17,10 +17,7 @@ module.exports = function (sequelize, DataTypes) {
     },
     totalSales: {
       type: DataTypes.STRING(255)
-    },
-    typeId: {
-      type: DataTypes.STRING(255),
-    },
+    }
   }, {
     underscored: true,
     freezeTableName: true,
