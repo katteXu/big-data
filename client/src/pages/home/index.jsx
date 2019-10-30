@@ -92,6 +92,7 @@ class Home extends Component {
     imgUrl: '',
     showImg: false,
     isClean: true,
+    msgType: 'success',
   };
 
   componentDidMount() {
@@ -115,26 +116,39 @@ class Home extends Component {
     });
   };
 
-  query = async () => {
-    const { date, goodsType } = this.state;
+  query = () => {
+    this.setState(
+      {
+        page: 1,
+      },
+      this.setDataList,
+    );
+  };
+
+  setDataList = async () => {
+    const { date, goodsType, page } = this.state;
     const params = {
       date,
       goodsType,
+      page,
+      limit: 10,
     };
     this.setState({
       loading: true,
     });
     const res = await getDataList({ params });
     this.setState({
-      dataList: res,
+      dataList: res.rows,
+      count: res.count,
       loading: false,
-      reqMessage: `成功获取数据 ${res.length} 条`,
+      reqMessage: `获取数据 ${res.count} 条`,
+      msgType: 'success',
     });
   };
 
   // 导入数据
   import = async () => {
-    const { idate, igoodsType } = this.state;
+    const { idate, igoodsType, isClean } = this.state;
     if (!idate) {
       message.error('日期不能为空');
       return;
@@ -146,11 +160,11 @@ class Home extends Component {
     this.setState({
       iloading: true,
     });
-    const res = await importData(idate, igoodsType);
+    const res = await importData(idate, igoodsType, isClean);
     if (res.count) {
       this.setState({
-        dataList: res.data,
-        reqMessage: `成功导入数据 ${res.count} 条`,
+        reqMessage: `导入数据 ${res.count} 条`,
+        msgType: 'info',
         visible: false,
         iloading: false,
       });
@@ -176,7 +190,8 @@ class Home extends Component {
 
     this.setState({
       dloading: false,
-      reqMessage: `成功删除数据 ${data} 条`,
+      reqMessage: `删除数据 ${data} 条`,
+      msgType: 'warning',
       dataList: [],
     });
   };
@@ -230,6 +245,15 @@ class Home extends Component {
     }
   };
 
+  onChangePage = page => {
+    this.setState(
+      {
+        page,
+      },
+      this.setDataList,
+    );
+  };
+
   render() {
     const {
       dateList,
@@ -244,11 +268,22 @@ class Home extends Component {
       isClean,
       showImg,
       uloading,
+      page,
+      count,
+      msgType,
     } = this.state;
     return (
       <PageHeaderWrapper
         title="数据库操作"
-        content="可将excel导入数据库 ，根据查询数据库信息，根据条件清空数据库信息"
+        content={
+          <ul style={{ listStyleType: 'disc' }}>
+            <li>可将打包的excel上传服务端</li>
+            <li>可将excel导入数据库</li>
+            <li>查询数据库信息</li>
+            <li>清空数据库信息</li>
+            <li>清洗数据库信息</li>
+          </ul>
+        }
       >
         <Row gutter={8} type="flex" align="bottom">
           <Col span={6}>
@@ -312,7 +347,7 @@ class Home extends Component {
               <Alert
                 style={{ marginBottom: 10 }}
                 message={`${reqMessage}`}
-                type="success"
+                type={msgType}
                 showIcon
               />
             )}
@@ -323,6 +358,12 @@ class Home extends Component {
               size="middle"
               columns={columns}
               dataSource={dataList}
+              pagination={{
+                onChange: p => this.onChangePage(p),
+                pageSize: 10,
+                current: page,
+                total: count,
+              }}
             />
           </Col>
         </Row>
@@ -418,6 +459,7 @@ class Home extends Component {
           </Row>
         </Drawer>
 
+        {/* 显示图片 */}
         <Modal
           footer={null}
           visible={showImg}

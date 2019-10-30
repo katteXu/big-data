@@ -55,13 +55,15 @@ router.get('/api/getGoodsTypeList', async ctx => {
   ctx.body = type;
 });
 
-// 根据传参导入数据库
+// 根据传参导入数据库 并清洗
 router.get('/api/import', async ctx => {
-  const { date, goodsType } = ctx.query;
+  const { date, goodsType, isClean } = ctx.query;
   const res = await importDataBase(date, goodsType);
+  if (isClean === 'true') {
+    await cleanData();
+  }
   ctx.body = {
-    count: res.length,
-    data: res
+    count: res.length
   }
 });
 
@@ -81,14 +83,19 @@ router.get('/api/delete', async ctx => {
 
 // 查询数据接口
 router.get('/api/getData', async ctx => {
-  const { date, goodsType } = ctx.query;
+  const { date, goodsType, page, limit } = ctx.query;
   const query = {};
   date && (query.date = date)
   goodsType && (query.typeId = goodsType);
-  const data = await Good.findAll({
-    where: query
+
+  // const count = await Good.findAll
+
+  const res = await Good.findAndCountAll({
+    where: query,
+    offset: (page - 1) * limit,
+    limit: limit * 1,
   });
-  ctx.body = data;
+  ctx.body = res;
 });
 
 // 登录接口

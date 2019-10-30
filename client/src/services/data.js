@@ -9,8 +9,8 @@ export async function getGoodsTypeList() {
 export async function getDataList({ params } = {}) {
   return request('/api/getData', { params });
 }
-export async function importData(date, goodsType) {
-  return request(`/api/import?date=${date}&&goodsType=${goodsType}`);
+export async function importData(date, goodsType, isClean) {
+  return request(`/api/import?date=${date}&goodsType=${goodsType}&isClean=${isClean}`);
 }
 export async function deleteData({ params } = {}) {
   return request('/api/delete', { params });
