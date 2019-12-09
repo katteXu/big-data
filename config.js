@@ -1,12 +1,14 @@
 const config = {
-  port: 3000,
+  port: 8000,
 
   mysql: {
     database: 'bigdata',
     username: 'root',
-    password: 'Xjx19880709',
-    host: 'cd-cdb-50s4i9m6.sql.tencentcdb.com',
-    port:'62752'
+    // password: '123',
+    // host: '127.0.0.1',
+    password: 'xu_jiaxin1234',
+    host: 'rm-2zeb204m4pi3a0vm2ko.mysql.rds.aliyuncs.com',
+    port: '3306'
   }
 }
 

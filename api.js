@@ -12,6 +12,7 @@ function getDate() {
         const text = moment(item).format('YYYY-MM-DD')
         return ({ text, key: item })
       })
+    console.log(dateList);
     return dateList;
   } else {
     return []

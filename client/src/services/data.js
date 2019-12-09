@@ -24,3 +24,6 @@ export async function uploadData(formData) {
     data: formData,
   });
 }
+export async function importAllData() {
+  return request('api/importAll');
+}

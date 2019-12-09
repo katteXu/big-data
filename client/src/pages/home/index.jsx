@@ -1,6 +1,19 @@
 import React, { Component } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import { Row, Col, Select, Button, Table, message, Alert, Drawer, Modal, Checkbox } from 'antd';
+import {
+  Row,
+  Col,
+  Select,
+  Button,
+  Table,
+  message,
+  Alert,
+  Drawer,
+  Modal,
+  Checkbox,
+  Tag,
+} from 'antd';
+import Tags from '@/utils/tags';
 import {
   getDateList,
   getGoodsTypeList,
@@ -9,6 +22,7 @@ import {
   deleteData,
   cleanData,
   uploadData,
+  importAllData,
 } from '@/services/data';
 
 class Home extends Component {
@@ -84,6 +98,50 @@ class Home extends Component {
           </a>
         ),
       },
+      {
+        title: '标签',
+        dataIndex: 'tags',
+        key: 'tags',
+        width: 320,
+        render: (value, record) => {
+          const { typeId, title } = record;
+          const tags = Tags[typeId];
+          const resultTag = [];
+          const { color } = tags;
+          let resultCode = '';
+          let otherCode = '';
+          let otherTag = '';
+          if (tags.children) {
+            Object.keys(tags.children).forEach(key => {
+              const code = key;
+              const item = tags.children[key];
+              const tagList = item.tagList.filter(tag => title.includes(tag));
+              if (tagList.length > 0) {
+                resultCode = code;
+                resultTag.push(...tagList);
+              } else {
+                otherCode = key;
+                otherTag = tags.children[key].tagsName;
+              }
+            });
+          }
+          return (
+            <div>
+              <Tag color="lime">{`编号：${resultCode || otherCode}`}</Tag>
+              {resultTag.map(tag => (
+                <Tag key={tag} color={color}>
+                  {tag}
+                </Tag>
+              ))}
+              {resultTag.length === 0 && (
+                <Tag key={otherTag} color={color}>
+                  {otherTag}
+                </Tag>
+              )}
+            </div>
+          );
+        },
+      },
     ],
     reqMessage: '',
     loading: false,
@@ -93,6 +151,7 @@ class Home extends Component {
     showImg: false,
     isClean: true,
     msgType: 'success',
+    aloading: false,
   };
 
   componentDidMount() {
@@ -169,6 +228,20 @@ class Home extends Component {
         iloading: false,
       });
     }
+  };
+
+  // 全部导入
+  importAll = async () => {
+    this.setState({
+      aloading: true,
+    });
+    const res = await importAllData();
+
+    console.log(res);
+
+    this.setState({
+      aloading: false,
+    });
   };
 
   // 清洗数据
@@ -271,6 +344,7 @@ class Home extends Component {
       page,
       count,
       msgType,
+      aloading,
     } = this.state;
     return (
       <PageHeaderWrapper
@@ -454,6 +528,13 @@ class Home extends Component {
             <Col span={12}>
               <Button block onClick={this.clean} loading={iloading}>
                 数据清洗
+              </Button>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: 12 }}>
+            <Col>
+              <Button block type="danger" onClick={this.importAll} loading={aloading}>
+                全部导入
               </Button>
             </Col>
           </Row>

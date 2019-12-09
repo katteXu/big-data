@@ -179,7 +179,7 @@ export default {
   chainWebpack: webpackPlugin,
   proxy: {
     '/api/': {
-      target: 'http://localhost:3000',
+      target: 'http://localhost:8000',
       changeOrigin: true, // pathRewrite: { '^/server': '' },
     },
   },

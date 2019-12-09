@@ -88,8 +88,6 @@ router.get('/api/getData', async ctx => {
   date && (query.date = date)
   goodsType && (query.typeId = goodsType);
 
-  // const count = await Good.findAll
-
   const res = await Good.findAndCountAll({
     where: query,
     offset: (page - 1) * limit,
@@ -172,51 +170,58 @@ router.get('/api/currentUser', async ctx => {
 
 // 获取统计数据
 router.get('/api/fake_chart_data', async ctx => {
-  const res = await Good.findAll();
-  const type = await GoodType.findAll();
+  // const res = await Good.findAll();
+  // const type = await GoodType.findAll();
   // console.log(res);
-  const result = _.chain(res)
-    .groupBy("typeId")
-    .map(function (value, key) {
-      // const resByType = await Good.findAll({ where: { typeId: key } });
-      // const date = _.chain(resByType).groupBy("date").map(function (value, key) {
-      //   return {
-      //     one: _reduce(value, function (result, current) {
-      //       return result + current.salesVolume;
-      //     }, 0)
-      //   }
-      // })
-      return {
-        id: key,
-        salesVolume: _.reduce(value, function (result, current) {
-          return result + current.salesVolume
-        }, 0)
-      };
-    }).value();
+  // const result = _.chain(res)
+  //   .groupBy("typeId")
+  //   .map(function (value, key) {
+  //     // const resByType = await Good.findAll({ where: { typeId: key } });
+  //     // const date = _.chain(resByType).groupBy("date").map(function (value, key) {
+  //     //   return {
+  //     //     one: _reduce(value, function (result, current) {
+  //     //       return result + current.salesVolume;
+  //     //     }, 0)
+  //     //   }
+  //     // })
+  //     return {
+  //       id: key,
+  //       salesVolume: _.reduce(value, function (result, current) {
+  //         return result + current.salesVolume
+  //       }, 0)
+  //     };
+  //   }).value();
   // 单类商品 日销量
-  const totalByDate = await Promise.all(type.map(async ({ id, name }) => {
-    const res = await Good.findAll({ where: { typeId: id } });
-    const result = _.chain(res).groupBy("date").map((value, key) => {
-      return {
-        x: key, y: _.reduce(value, function (result, current) {
-          return result + current.salesVolume
-        }, 0)
-      }
-    })
-    const total = _.reduce(res, function (result, current) {
-      return result + current.salesVolume
-    }, 0)
-    return { name, data: result, total };
-  }));
+  // const totalByDate = await Promise.all(type.map(async ({ id, name }) => {
+  //   const res = await Good.findAll({ where: { typeId: id } });
+  //   const result = _.chain(res).groupBy("date").map((value, key) => {
+  //     return {
+  //       x: key, y: _.reduce(value, function (result, current) {
+  //         return result + current.salesVolume
+  //       }, 0)
+  //     }
+  //   })
+  //   const total = _.reduce(res, function (result, current) {
+  //     return result + current.salesVolume
+  //   }, 0)
+  //   return { name, data: result, total };
+  // }));
+  const totalByDate = [
+    { name: '茶', data: [], total: 1545433 },
+    { name: '干果', data: [], total: 2345433 },
+    { name: '果脯', data: [], total: 223456 },
+    { name: '粮油', data: [], total: 3437722 },
+    { name: '花卉苗木', data: [], total: 343346 },
+    { name: '食用菌', data: [], total: 7567345 },
+    { name: '水果', data: [], total: 34535 },
+    { name: '烟叶', data: [], total: 86779 }
+  ]
 
   // 总销量
-  const total = type.map(({ id, name }) => {
-    const sales = result.find(o => o.id == id);
-    const total = sales ? sales.salesVolume : 0;
-    return { x: name, y: total };
-  });
+  let total = (await Statistics.findAll());
+  total = total.map(item => ({ x: item.name, y: item.totalSales * 1 || 0 }));
   ctx.body = { ...getFakeChartData, salesData: total, visitData: totalByDate };
-})
+});
 
 // 清洗数据
 router.get('/api/clean', async ctx => {
@@ -236,6 +241,21 @@ router.post('/api/upload', upload.single('file'), async ctx => {
   }
 });
 
+router.get('/api/testData', async ctx => {
+  ctx.status = 100;
+  ctx.body = {
+    data: 22222222
+  }
+});
+
+// 全部导入
+router.get('/api/importAll', async ctx => {
+  const res = await importAllToDataBase();
+  ctx.body = {
+    res
+  }
+})
+
 
 // 批量导入
 const importDataBase = async (date, goodsType) => {
@@ -247,7 +267,22 @@ const importDataBase = async (date, goodsType) => {
   const json = getFile(date, type[0].name);
   json.shift();
   const record = json.map(items => ({ ...items, typeId: goodsType, date }));
-  return await Good.bulkCreate(record);
+  return Good.bulkCreate(record);
+}
+
+// 全部导入数据库
+const importAllToDataBase = async () => {
+  const dateList = getDate();
+  const goodsTypeList = await GoodType.findAll();
+  for (let i = 0; i < dateList.length; i++) {
+    const date = dateList[i].key;
+    for (let j = 0; j < goodsTypeList.length; j++) {
+      const goodsType = goodsTypeList[j].id;
+      await importDataBase(date, goodsType);
+    }
+  }
+
+  return { dateList, goodsTypeList }
 }
 
 // 获取文件json

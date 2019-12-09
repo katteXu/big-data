@@ -22,8 +22,11 @@ const GoodType = sequelize.import('./goodType');
 // 整体统计表
 const Statistics = sequelize.import('./statistics');
 
+// 按时间统计表
+const StatisticsDate = sequelize.import('./statisticsDate');
 // 清洗数据 查询
 const cleanData = async () => {
+  // 获取总统计数据
   const res = await sequelize.query(`
   select 
   b.id id,
@@ -41,11 +44,53 @@ const cleanData = async () => {
 `, {
     type: Sequelize.QueryTypes.SELECT
   });
-  const result = Statistics.bulkCreate(res, {
-    updateOnDuplicate: ["id","name","totalPrice","averagePrice","totalSales"]
+  // 获取时间段统计数据
+  const resByDate = await sequelize.query(`
+  SELECT
+	a.type_id typeId,
+	b.name name,
+	date,
+	sum( a.discount_price ) totalPrice,
+	avg( a.discount_price ) averagePrice,
+	avg(
+	CASE
+			
+			WHEN a.original_price = "N/A" THEN
+			a.discount_price ELSE a.original_price * 1 
+		END 
+		) averageOriginalPrice,
+		sum(
+		CASE
+				
+				WHEN a.sales_volume LIKE '%万%' THEN
+				a.sales_volume * 10000 ELSE a.sales_volume * 1 
+			END 
+			) totalSales 
+		FROM
+			good a
+			right JOIN goodType b ON a.type_id = b.id 
+		GROUP BY
+		b.id,
+	  a.date
+  `, {
+    type: Sequelize.QueryTypes.SELECT
   });
-  return result;
+  const result = Statistics.bulkCreate(res, {
+    updateOnDuplicate: ["id", "name", "totalPrice", "averagePrice", "totalSales"]
+  });
+  // 先清空
+  await StatisticsDate.destroy({
+    where: {}
+  });
+  const resultByDate = StatisticsDate.bulkCreate(resByDate, {
+    updateOnDuplicate: ["name", "typeId", "date", "totalPrice", "averagePrice", "averageOriginalPrice", "totalSales"]
+  });
+  return {
+    result,
+    resultByDate
+  };
 }
+
 
 // 同步数据库
 sequelize.sync().then(async () => {
@@ -73,5 +118,6 @@ module.exports = {
   Good,
   GoodType,
   Statistics,
+  StatisticsDate,
   cleanData
 }
