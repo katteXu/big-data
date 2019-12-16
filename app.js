@@ -11,7 +11,7 @@ const _ = require('lodash');
 const fs = require('fs');
 const compressing = require('compressing');
 const config = require('./config');
-const { Good, GoodType, Statistics, cleanData } = require('./models');
+const { Good, GoodType, Statistics, StatisticsDate, cleanData } = require('./models');
 const app = new Koa();
 const router = new Router();
 const home = Public(path.resolve(__dirname, "./client/dist/"))
@@ -171,6 +171,24 @@ router.get('/api/currentUser', async ctx => {
 // 获取统计数据
 router.get('/api/fake_chart_data', async ctx => {
   // const res = await Good.findAll();
+  const totalByDate1 = await StatisticsDate.findAll();
+  const resObj = {};
+  totalByDate1.forEach((item) => {
+    if (resObj[item.typeId]) {
+      resObj[item.typeId].total = (resObj[item.typeId].total * 1 || 0) + item.totalSales * 1;
+      resObj[item.typeId].data.push({ x: item.date, y: item.totalSales });
+    } else {
+      resObj[item.typeId] = {
+        name: item.name,
+        total: item.totalSales,
+        data: [{ x: item.date, y: item.totalSales * 1 }]
+      }
+    }
+  });
+
+  const totalByDate = Object.keys(resObj).map(key => {
+    return resObj[key];
+  })
   // const type = await GoodType.findAll();
   // console.log(res);
   // const result = _.chain(res)
@@ -206,16 +224,16 @@ router.get('/api/fake_chart_data', async ctx => {
   //   }, 0)
   //   return { name, data: result, total };
   // }));
-  const totalByDate = [
-    { name: '茶', data: [], total: 1545433 },
-    { name: '干果', data: [], total: 2345433 },
-    { name: '果脯', data: [], total: 223456 },
-    { name: '粮油', data: [], total: 3437722 },
-    { name: '花卉苗木', data: [], total: 343346 },
-    { name: '食用菌', data: [], total: 7567345 },
-    { name: '水果', data: [], total: 34535 },
-    { name: '烟叶', data: [], total: 86779 }
-  ]
+  // const totalByDate = [
+  //   { name: '茶', data: [{ x: '2019-1-1', y: 15000 }, { x: '2019-2-2', y: 1500000 }], total: 1545433 },
+  //   { name: '干果', data: [], total: 2345433 },
+  //   { name: '果脯', data: [], total: 223456 },
+  //   { name: '粮油', data: [], total: 3437722 },
+  //   { name: '花卉苗木', data: [], total: 343346 },
+  //   { name: '食用菌', data: [], total: 7567345 },
+  //   { name: '水果', data: [], total: 34535 },
+  //   { name: '烟叶', data: [], total: 86779 }
+  // ]
 
   // 总销量
   let total = (await Statistics.findAll());

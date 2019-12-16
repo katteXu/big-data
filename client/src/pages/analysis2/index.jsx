@@ -158,7 +158,7 @@ class Analysis2 extends Component {
               </Suspense>
             </Col>
           </Row>
-          <Row gutter={24} type="flex">
+          {/* <Row gutter={24} type="flex">
             <Col xl={12} lg={24} md={24} sm={24} xs={24}>
               <Suspense fallback={null}>
                 <TopSearch
@@ -190,6 +190,7 @@ class Analysis2 extends Component {
               handleTabChange={this.handleTabChange}
             />
           </Suspense>
+         */}
         </React.Fragment>
       </GridContent>
     );

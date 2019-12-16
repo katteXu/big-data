@@ -122,6 +122,12 @@ export default {
               component: './analysis2',
             },
             {
+              name: 'address',
+              icon: 'dot-chart',
+              path: '/address',
+              component: './address',
+            },
+            {
               component: './404',
             },
           ],

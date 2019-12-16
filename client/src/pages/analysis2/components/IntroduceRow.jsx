@@ -25,23 +25,30 @@ const color = [
   '#BBBBBB',
 ];
 const IntroduceRow = ({ loading, visitData }) => (
-  <Row gutter={24} type="flex">
-    {/* 总销售额 */}
-    {visitData.map((item, i) => (
-      <Col key={item.name} {...topColResponsiveProps}>
-        <ChartCard
-          bordered={false}
-          loading={loading}
-          title={<span style={{ color: color[i % 7], fontSize: 20 }}>{item.name}</span>}
-          total={numeral(item.total).format('0,0')}
-          footer={<Field label="总销量" value={numeral(item.total).format('0,0')} />}
-          contentHeight={46}
-        >
-          <MiniArea color={color[i % 7]} data={item.data} />
-        </ChartCard>
+  <>
+    <Row>
+      <Col>
+        <h1>日期销量分布图</h1>
       </Col>
-    ))}
-  </Row>
+    </Row>
+    <Row gutter={24} type="flex" style={{ marginTop: 12 }}>
+      {/* 总销售额 */}
+      {visitData.map((item, i) => (
+        <Col key={item.name} {...topColResponsiveProps}>
+          <ChartCard
+            bordered={false}
+            loading={loading}
+            title={<span style={{ color: color[i % 7], fontSize: 20 }}>{item.name}</span>}
+            total={numeral(item.total).format('0,0')}
+            footer={<Field label="总销量" value={numeral(item.total).format('0,0')} />}
+            contentHeight={46}
+          >
+            <MiniArea color={color[i % 7]} data={item.data} />
+          </ChartCard>
+        </Col>
+      ))}
+    </Row>
+  </>
 );
 
 export default IntroduceRow;
