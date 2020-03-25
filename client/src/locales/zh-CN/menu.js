@@ -6,6 +6,7 @@ export default {
   'menu.myAnalysis': '数据分析',
   'menu.analysis2': '销量分析',
   'menu.address': '地域分析',
+  'menu.address2': '价格分析',
   'menu.login': '登录',
   'menu.register': '注册',
   'menu.register.result': '注册结果',

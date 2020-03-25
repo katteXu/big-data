@@ -116,16 +116,58 @@ export default {
               component: './home',
             },
             {
-              name: 'analysis2',
-              icon: 'bar-chart',
-              path: '/analysis2',
-              component: './analysis2',
+              name: '商品大类',
+              path: '/big',
+              routes: [
+                {
+                  name: '销量分析',
+                  icon: 'bar-chart',
+                  path: '/big/analysis2',
+                  component: './analysis2',
+                },
+                {
+                  name: '地域分析',
+                  icon: 'dot-chart',
+                  path: '/big/address',
+                  component: './big/address',
+                },
+                {
+                  name: '价格分析',
+                  icon: 'pie-chart',
+                  path: '/big/charge',
+                  component: './big/charge',
+                },
+                {
+                  name: '综合分析',
+                  icon: 'line-chart',
+                  path: '/big/synthesize',
+                  component: './big/synthesize',
+                },
+              ],
             },
             {
-              name: 'address',
-              icon: 'dot-chart',
-              path: '/address',
-              component: './address',
+              name: '商品小类',
+              path: '/small',
+              routes: [
+                {
+                  name: '销量分析',
+                  icon: 'bar-chart',
+                  path: '/small/analysis',
+                  component: './small/analysis',
+                },
+                {
+                  name: '地域分析',
+                  icon: 'dot-chart',
+                  path: '/small/test',
+                  component: './small/address',
+                },
+                {
+                  name: '价格分析',
+                  icon: 'pie-chart',
+                  path: '/small/charge',
+                  component: './small/charge',
+                },
+              ],
             },
             {
               component: './404',
